@@ -7,8 +7,8 @@ CREATE TABLE PLAYERS (
 
 CREATE TABLE MATCHES (
 	id serial primary key not null,
-	player1 serial references PLAYERS(id),
-	player2 serial references PLAYERS(id)
+	player1 integer references PLAYERS(id),
+	player2 integer references PLAYERS(id)
 );
 
 CREATE VIEW RESULTS AS SELECT ID, PLAYER1 AS WINNER FROM MATCHES;
