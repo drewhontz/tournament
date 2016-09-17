@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
@@ -25,6 +25,7 @@ def deleteMatches():
     conn.commit()
     conn.close()
 
+
 def deletePlayers():
     """Remove all the player records from the database."""
     conn, c = connect()
@@ -34,6 +35,7 @@ def deletePlayers():
     c.close()
     conn.commit()
     conn.close()
+
 
 def countPlayers():
     """Returns the number of players currently registered."""
@@ -51,10 +53,8 @@ def countPlayers():
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
     Args:
       name: the player's full name (need not be unique).
     """
@@ -64,6 +64,7 @@ def registerPlayer(name):
     c.execute(q, data)
     conn.commit()
     conn.close()
+
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
@@ -84,7 +85,7 @@ def playerStandings():
     res = c.fetchall()
     c.close()
     conn.close()
-    
+
     result = list()
     for row in res:
         result.append((row[0], row[1], row[2], row[3]))
@@ -99,25 +100,24 @@ def reportMatch(winner, loser):
       loser:  the id number of the player who lost
 
     Insert into record id of winner, wins +=1 (increment in python and
-        re-insert or do via sql) 
+        re-insert or do via sql)
     """
     conn, c = connect()
-    
+
     q = "INSERT INTO MATCHES VALUES (default, %s, %s);"
     data = ((winner,), (loser,))
     c.execute(q, data)
     conn.commit()
     conn.close()
- 
- 
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player
     adjacent to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -130,8 +130,8 @@ def swissPairings():
 
     # Looks at indices in standings with even numbers and pairs them with
     # adjacent players (i.e. players with the most similar standing)
-    for x in range (0, len(standings)/2):
+    for x in range(0, len(standings)/2):
         new_match = (standings[2 * x][0], standings[2 * x][1],
-            standings[2 * x + 1][0], standings[2 * x + 1][1])
+                     standings[2 * x + 1][0], standings[2 * x + 1][1])
         match_list.append(new_match)
     return match_list
