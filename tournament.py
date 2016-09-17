@@ -53,8 +53,6 @@ def registerPlayer(name):
   
     Args:
       name: the player's full name (need not be unique).
-    2) If validations pass: Insert into players (name, <other info>) values 
-    (<values>)
     """
     conn = connect()
     c = conn.cursor()
@@ -76,11 +74,6 @@ def playerStandings():
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
-
-    -What will happen if the players haven't played any matches yet?
-
-    select p.id, p.name, s.w, (sum s.w s.l) as matches, from pid = sid order by
-    s.w desc
     """
     conn = connect()
     c = conn.cursor()
@@ -134,6 +127,8 @@ def swissPairings():
     standings = playerStandings()
     match_list = []
 
+    # Looks at indices in standings with even numbers and pairs them with
+    # adjacent players (i.e. players with the most similar standing)
     for x in range (0, len(standings)/2):
         new_match = (standings[2 * x][0], standings[2 * x][1],
             standings[2 * x + 1][0], standings[2 * x + 1][1])
