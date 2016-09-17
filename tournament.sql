@@ -19,13 +19,14 @@ CREATE VIEW RESULTS AS SELECT ID, PLAYER1 AS WINNER FROM MATCHES;
 -- where the player's id is in the results.winner column. The second left outer
 -- join then takes place with the count of total (matches.id) to determine the 
 -- total number of matches
-CREATE VIEW STANDINGS AS SELECT players.id, name,
-    count(results.winner) AS wins,
-    (SELECT count(matches.id) FROM matches
-	WHERE players.id = matches.player1
-	OR players.id = matches.player2) AS matches
+CREATE OR REPLACE VIEW STANDINGS AS
+    SELECT  players.id,
+            players.name,
+            SUM(CASE WHEN players.id = matches.winner THEN 1 ELSE 0 END) AS wins,
+            SUM(CASE WHEN players.id = matches.winner OR players.id = matches.loser THEN 1 ELSE 0 END) AS match_count
     FROM players
-    LEFT OUTER JOIN results ON players.id = results.winner
-    LEFT OUTER JOIN matches ON matches.id = results.id
-    GROUP BY players.id, results.winner
-    ORDER BY wins DESC;
+    LEFT JOIN matches
+    ON players.id = matches.winner OR players.id = matches.loser
+    GROUP BY players.id
+    ORDER BY wins DESC,
+             match_count ASC;
