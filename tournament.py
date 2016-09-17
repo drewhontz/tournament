@@ -22,9 +22,7 @@ def deleteMatches():
     conn.close()
 
 def deletePlayers():
-    """Remove all the player records from the database.
-       This has dependencies with Matches and should therefore only be run if
-       there are no matches"""
+    """Remove all the player records from the database."""
     conn = connect()
     c = conn.cursor()
     q = "DELETE FROM PLAYERS;"
@@ -33,18 +31,14 @@ def deletePlayers():
     conn.commit()
     conn.close()
 
-
 def countPlayers():
-    """Returns the number of players currently registered.
-       -select count(id) from players
-       -Should return int
-       -if count is 0, will our query return a 0 or null?
-       """
+    """Returns the number of players currently registered."""
     conn = connect()
     c = conn.cursor()
     q = "select count(id) FROM PLAYERS;"
     c.execute(q)
     res = c.fetchone()
+
     c.close()
     conn.commit()
     conn.close()
@@ -88,6 +82,18 @@ def playerStandings():
     select p.id, p.name, s.w, (sum s.w s.l) as matches, from pid = sid order by
     s.w desc
     """
+    conn = connect()
+    c = conn.cursor()
+    q = "select * from standings"
+    c.execute(q)
+    res = c.fetchall()
+    c.close()
+    conn.close()
+    
+    result = list()
+    for row in res:
+        result.append((row[0], row[1], row[2], row[3]))
+    return result
 
 
 def reportMatch(winner, loser):
@@ -100,6 +106,14 @@ def reportMatch(winner, loser):
     Insert into record id of winner, wins +=1 (increment in python and
         re-insert or do via sql) 
     """
+    conn = connect()
+    c = conn.cursor()
+    
+    q = "INSERT INTO MATCHES VALUES (default, %s, %s);"
+    data = ((winner,), (loser,))
+    c.execute(q, data)
+    conn.commit()
+    conn.close()
  
  
 def swissPairings():
@@ -117,5 +131,11 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    standings = playerStandings()
+    match_list = []
 
-
+    for x in range (0, len(standings)/2):
+        new_match = (standings[2 * x][0], standings[2 * x][1],
+            standings[2 * x + 1][0], standings[2 * x + 1][1])
+        match_list.append(new_match)
+    return match_list

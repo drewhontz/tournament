@@ -1,10 +1,4 @@
--- Table definitions for the tournament project.
---
--- Put your SQL 'create table' statements in this file; also 'create view'
--- statements if you choose to use it.
---
--- You can write comments in this file by starting them with two dashes, like
--- these lines here.
+-- Table definitions for the tournament project. Minus the Create DB statement
 
 CREATE TABLE PLAYERS (
 	id serial primary key not null,
@@ -17,15 +11,21 @@ CREATE TABLE MATCHES (
 	player2 serial references PLAYERS(id)
 );
 
-CREATE TABLE RESULTS (
-	id serial references MATCHES(id),
-	winner serial references PLAYERS(id)
-);
+CREATE VIEW RESULTS AS SELECT ID, PLAYER1 AS WINNER FROM MATCHES;
 
--- CREATE VIEW STANDINGS (
--- 	SELECT PLAYERS.id as id,
--- 	PLAYERS.name as name,
--- 	(SELECT count(id) FROM RESULTS WHERE id = winner) as wins,
--- 	(SELECT count(*) FROM MATCHES WHERE id = player1 OR id = player2) as matches,
--- 	FROM PLAYERS as p, MATCHES as m, RESULTS as r;
--- )
+
+-- This gets a little sloppy but the view standings is formed by 2 left outer
+-- joins of players.id & players.name where the first outer join is on the count 
+-- where the player's id is in the results.winner column. The second left outer
+-- join then takes place with the count of total (matches.id) to determine the 
+-- total number of matches
+CREATE VIEW STANDINGS AS SELECT players.id, name,
+    count(results.winner) AS wins,
+    (SELECT count(matches.id) FROM matches
+	WHERE players.id = matches.player1
+	OR players.id = matches.player2) AS matches
+    FROM players
+    LEFT OUTER JOIN results ON players.id = results.winner
+    LEFT OUTER JOIN matches ON matches.id = results.id
+    GROUP BY players.id, results.winner
+    ORDER BY wins DESC;
