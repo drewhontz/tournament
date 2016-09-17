@@ -11,14 +11,10 @@ CREATE TABLE MATCHES (
 	loser integer references PLAYERS(id)
 );
 
-CREATE VIEW RESULTS AS SELECT ID, PLAYER1 AS WINNER FROM MATCHES;
-
-
--- This gets a little sloppy but the view standings is formed by 2 left outer
--- joins of players.id & players.name where the first outer join is on the count 
--- where the player's id is in the results.winner column. The second left outer
--- join then takes place with the count of total (matches.id) to determine the 
--- total number of matches
+-- Left joins the players id & name columns with the sum of instances where
+-- player's id is in the matches.winner column for total wins. Also looks 
+-- for sum of instances where players id is in any column of matches to
+-- determine total number of matches 
 CREATE OR REPLACE VIEW STANDINGS AS
     SELECT  players.id,
             players.name,
