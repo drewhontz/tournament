@@ -6,15 +6,19 @@
 import psycopg2
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+def connect(database_name="tournament"):
+    try:
+        db = psycopg2.connect("dbname={}".format(database_name))
+        cursor = db.cursor()
+        return db, cursor
+    except:
+        print("Could not connect to db")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
+
     q = "DELETE FROM MATCHES;"
     c.execute(q)
     c.close()
@@ -23,8 +27,8 @@ def deleteMatches():
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
+
     q = "DELETE FROM PLAYERS;"
     c.execute(q)
     c.close()
@@ -33,8 +37,8 @@ def deletePlayers():
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
+
     q = "select count(id) FROM PLAYERS;"
     c.execute(q)
     res = c.fetchone()
@@ -54,8 +58,7 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     q = "INSERT INTO PLAYERS VALUES (default, %s);"
     data = (name,)
     c.execute(q, data)
@@ -75,8 +78,7 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     q = "select * from standings"
     c.execute(q)
     res = c.fetchall()
@@ -99,8 +101,7 @@ def reportMatch(winner, loser):
     Insert into record id of winner, wins +=1 (increment in python and
         re-insert or do via sql) 
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     
     q = "INSERT INTO MATCHES VALUES (default, %s, %s);"
     data = ((winner,), (loser,))
